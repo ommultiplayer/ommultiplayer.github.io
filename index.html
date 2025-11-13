@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Om: Het Oneindige Gevecht</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900;600&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s;
+        }
+        .main-btn {
+            transition: all 0.2s ease-in-out;
+            transform: scale(1);
+            letter-spacing: 0.05em;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); 
+        }
+        .main-btn:hover {
+            transform: scale(1.03);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+        }
+        #mainHeader {
+            transition: background-color 0.3s ease-out;
+            border-radius: 0.5rem;
+            padding: 1rem 0;
+            background-size: 200% 200%; 
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 min-h-screen flex items-start md:items-center justify-center p-4">
+
+    <div class="max-w-xl w-full mx-auto p-6 md:p-10 bg-white rounded-2xl shadow-xl mt-10 mb-10 relative">
+
+        <header id="mainHeader" class="text-center mb-10">
+            <h1 class="text-7xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-teal-500 to-cyan-600 tracking-tight">
+                Om
+            </h1>
+            <p class="text-2xl md:text-3xl font-light mt-2 text-gray-600">
+                Het Oneindige Gevecht.
+            </p>
+        </header>
+
+        <section class="mb-8 text-center">
+            <label for="playerNameInput" class="block text-xl font-semibold mb-3 text-gray-700">Voer Je Vechtersnaam In</label>
+            <input type="text" id="playerNameInput" placeholder="bv. De Eenzame Vechter" 
+                   class="w-full p-4 text-2xl font-bold text-gray-800 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-4 focus:ring-teal-200 transition shadow-lg"
+                   oninput="handleNameInput()">
+            
+            <p id="playerNameDisplay" class="text-lg mt-3 font-bold text-teal-600 hidden">
+                Welkom, <span id="currentName" class="underline"></span>!
+            </p>
+        </section>
+
+        <section id="menu-options" class="hidden border-t border-gray-200 pt-8">
+            <h2 class="text-2xl font-bold text-center mb-6 text-gray-800">Hoofdmenu</h2>
+            <div class="flex flex-col space-y-4">
+                
+                <button id="main-game-btn" onclick="handleGameStartOrResume()" class="main-btn bg-teal-600 hover:bg-teal-700 text-white font-bold py-4 px-6 rounded-lg text-xl w-full">
+                    <span id="game-btn-text">START NIEUW SPEL</span>
+                </button>
+
+                <button onclick="showMessage('Multiplayer Status', 'Multiplayer is momenteel in ontwikkeling! Binnenkort kun je het opnemen tegen andere spelers.')" 
+                        class="main-btn bg-gray-200 hover:bg-gray-300 text-teal-700 font-semibold py-4 px-6 rounded-lg text-lg w-full">
+                    Multiplayer (Binnenkort)
+                </button>
+
+                <button onclick="showMessage('Hoe te Spelen', 'Ontwijk, blokkeer en val de adaptieve AI aan om zo lang mogelijk te overleven. Hoe langer je vecht, hoe moeilijker de AI wordt!')" 
+                        class="main-btn bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-4 px-6 rounded-lg text-lg w-full">
+                    Instructies
+                </button>
+                
+                <button onclick="showMessage('Winkel Status', 'De Winkel is in aanbouw! Je vechtersstatistieken worden bijgehouden. Wanneer de winkel wordt gelanceerd, kun je verdiende punten besteden om nieuwe vaardigheden en stijlen te ontgrendelen.')" 
+                        class="main-btn bg-gray-200 hover:bg-gray-300 text-teal-700 font-semibold py-4 px-6 rounded-lg text-lg w-full">
+                    Winkel (Binnenkort)
+                </button>
+
+            </div>
+        </section>
+
+
+        <footer class="text-center mt-10 text-sm text-gray-500 border-t pt-4 border-gray-100">
+            <p class="mb-1">&copy; 2025 Om - Ontwikkeld door Josh Sharma.</p>
+            <p>Ideeën mede mogelijk gemaakt door Om Battacharya en Tijn Beerthuizen.</p>
+        </footer>
+
+
+        <div id="message-box" class="fixed inset-0 bg-black bg-opacity-75 hidden items-center justify-center p-4 z-50">
+            <div class="bg-white p-8 rounded-xl shadow-2xl max-w-sm w-full border-t-4 border-teal-600">
+                <h3 id="message-title" class="text-xl font-bold mb-4 text-gray-800">Actie</h3>
+                <p id="message-content" class="text-gray-600 mb-6"></p>
+                <button onclick="document.getElementById('message-box').classList.add('hidden'); document.getElementById('message-box').classList.remove('flex');"
+                        class="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2 rounded-lg">
+                    Sluiten
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const OM_LAST_LEVEL_KEY = 'om_last_level';
+        const OM_PLAYER_NAME_KEY = 'om_player_name';
+
+        const playerNameInput = document.getElementById('playerNameInput');
+        const menuOptions = document.getElementById('menu-options');
+        const currentNameSpan = document.getElementById('currentName');
+        const playerNameDisplay = document.getElementById('playerNameDisplay');
+        const gameBtnText = document.getElementById('game-btn-text');
+        const mainHeader = document.getElementById('mainHeader');
+
+        let savedLevel = 0;
+        let playerName = "";
+
+
+        function showMessage(title, content) {
+            document.getElementById('message-title').textContent = title;
+            document.getElementById('message-content').textContent = content;
+            document.getElementById('message-box').classList.remove('hidden');
+            document.getElementById('message-box').classList.add('flex');
+        }
+
+        function checkGameState() {
+            try {
+                const level = localStorage.getItem(OM_LAST_LEVEL_KEY);
+                savedLevel = (level && !isNaN(parseInt(level))) ? parseInt(level) : 0;
+
+                if (savedLevel > 0) {
+                    gameBtnText.textContent = `HERVAT GEVECHT: NIVEAU ${savedLevel}`;
+                } else {
+                    gameBtnText.textContent = 'START NIEUW SPEL';
+                }
+            } catch (error) {
+                console.error("Error accessing localStorage for game state:", error);
+                gameBtnText.textContent = 'START NIEUW SPEL';
+            }
+        }
+
+        window.handleNameInput = function() {
+            playerName = playerNameInput.value.trim();
+
+            if (playerName.length >= 1) {
+                menuOptions.classList.remove('hidden');
+                playerNameDisplay.classList.remove('hidden');
+                currentNameSpan.textContent = playerName;
+            } else {
+                menuOptions.classList.add('hidden');
+                playerNameDisplay.classList.add('hidden');
+            }
+
+            if (playerName.length >= 1) {
+                localStorage.setItem(OM_PLAYER_NAME_KEY, playerName);
+            } else {
+                localStorage.removeItem(OM_PLAYER_NAME_KEY);
+            }
+        }
+        
+        window.handleGameStartOrResume = function() {
+            const currentName = currentNameSpan.textContent;
+            
+            if (savedLevel > 0) {
+                showMessage("Spel Hervat", `Welkom terug, ${currentName}! Laadt gevecht op Niveau ${savedLevel}.`);
+            } else {
+                localStorage.setItem(OM_LAST_LEVEL_KEY, 1); 
+                checkGameState(); 
+                showMessage("Spel Gestart", `Succes, ${currentName}! Start een nieuw gevecht op Niveau 1.`);
+            }
+        }
+
+        mainHeader.addEventListener('mousemove', (e) => {
+            const rect = mainHeader.getBoundingClientRect();
+            const x = e.clientX - rect.left; 
+            const y = e.clientY - rect.top; 
+
+            mainHeader.style.background = `radial-gradient(circle at ${x}px ${y}px, rgba(165, 243, 252, 0.4) 0%, rgba(255, 255, 255, 0) 60%)`;
+        });
+        
+        mainHeader.addEventListener('mouseleave', () => {
+            mainHeader.style.background = 'none';
+        });
+
+        window.onload = function() {
+            checkGameState(); 
+
+            const savedName = localStorage.getItem(OM_PLAYER_NAME_KEY);
+            if (savedName) {
+                playerNameInput.value = savedName;
+            }
+            
+            handleNameInput();
+        }
+        
+    </script>
+</body>
+</html>
