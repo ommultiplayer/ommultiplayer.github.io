@@ -1,234 +1,129 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Om: Het Oneindige Gevecht</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script> 
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900;600&display=swap');
-        
-        body {
-            font-family: 'Inter', sans-serif;
-            min-height: 100vh;
-            background-color: #eef2ff;
-            color: #333333; 
-        }
-
-        .main-btn {
-            transition: all 0.2s ease-in-out;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
-            border-radius: 0.5rem;
-        }
-        .main-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
-        }
-
-        #mainHeader h1 {
-            background-image: linear-gradient(to right, #4c669f, #3b82f6); 
-        }
-
-        .main-card {
-            max-width: 800px;
-            width: 95%;
-            background-color: #ffffff; 
-            min-height: 600px; 
-            color: #333333; 
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); 
-            padding: 2.5rem;
-        }
-        
-        #gameCanvas {
-            background-color: #f3f4f6;
-            border-radius: 0.5rem;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-            width: 100%; 
-            height: auto;
-        }
-        
-        .health-bar-fill {
-            transition: width 0.3s ease-out, background-color 0.2s;
-            border-radius: 4px;
-            height: 12px;
-            position: relative;
-            overflow: hidden;
-        }
-        .health-bar-bg {
-            background-color: #e5e7eb; 
-            border-radius: 4px;
-            height: 12px; 
-            position: relative;
-        }
-        .health-percentage-text {
-            position: absolute;
-            right: 0.25rem;
-            top: 50%;
-            transform: translateY(-50%);
-            z-index: 10;
-        }
-        
-        .light-input {
-            background-color: #ffffff; 
-            color: #1f2937;
-            border-color: #d1d5db;
-            transition: border-color 0.2s;
-        }
-        .light-input:focus {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-        }
+        body { font-family: 'Inter', sans-serif; min-height: 100vh; background-color: #eef2ff; color: #333333; }
+        .main-btn { transition: all 0.2s ease-in-out; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-radius: 0.5rem; }
+        .main-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 10px rgba(0,0,0,0.15); }
+        #mainHeader h1 { background-image: linear-gradient(to right, #4c669f, #3b82f6); }
+        .main-card { max-width: 900px; width: 95%; background-color: #ffffff; min-height: 600px; color: #333333; box-shadow: 0 10px 30px rgba(0,0,0,0.1); padding: 2.5rem; }
+        #gameCanvas { background-color: #f3f4f6; border-radius: 0.5rem; box-shadow: 0 4px 10px rgba(0,0,0,0.05); width: 100%; height: auto; }
+        .health-bar-fill { transition: width 0.3s ease-out, background-color 0.2s; border-radius: 4px; height: 12px; position: relative; overflow: hidden; }
+        .health-bar-bg { background-color: #e5e7eb; border-radius: 4px; height: 12px; position: relative; }
+        .health-percentage-text { position: absolute; right: 0.25rem; top: 50%; transform: translateY(-50%); z-index: 10; }
+        .light-input { background-color: #ffffff; color: #1f2937; border-color: #d1d5db; transition: border-color 0.2s; }
+        .light-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.2); }
+        .muted { color: #6b7280; }
     </style>
 </head>
 <body class="min-h-screen flex items-start md:items-center justify-center p-4">
-
     <div class="main-card w-full mx-auto rounded-2xl shadow-xl mt-10 mb-10">
-
         <div id="menuUi" class="flex flex-col items-center">
-            <header id="mainHeader" class="text-center mb-10 w-full">
-                <h1 class="text-7xl md:text-8xl font-black text-transparent bg-clip-text tracking-tight">
-                    Om
-                </h1>
-                <p class="text-2xl md:text-3xl font-light mt-2 text-blue-500">
-                    Het Oneindige Gevecht.
-                </p>
+            <header id="mainHeader" class="text-center mb-6 w-full">
+                <h1 class="text-6xl md:text-7xl font-black text-transparent bg-clip-text tracking-tight">Om</h1>
+                <p class="text-xl md:text-2xl font-light mt-2 text-blue-500">Het Oneindige Gevecht.</p>
             </header>
 
-            <section class="mb-8 text-center w-full">
-                <label for="playerNameInput" class="block text-xl font-semibold mb-3 text-gray-700">Voer Je Vechtersnaam In (Speler 1)</label>
-                <input type="text" id="playerNameInput" placeholder="bv. De Eenzame Vechter" 
-                        class="light-input w-full p-4 text-2xl font-bold rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-400 border-2 transition shadow-md placeholder-gray-400"
-                        oninput="handleNameInput()">
-                
-                <p id="playerNameDisplay" class="text-lg mt-3 font-bold text-blue-600 hidden">
-                    Welkom, <span id="currentName" class="underline"></span>!
-                </p>
+            <section class="mb-6 text-center w-full">
+                <label for="playerNameInput" class="block text-lg font-semibold mb-2 text-gray-700">Voer Je Vechtersnaam In (Speler 1)</label>
+                <input type="text" id="playerNameInput" placeholder="bv. De Eenzame Vechter"
+                    class="light-input w-full p-3 text-xl font-bold rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-400 border-2 transition shadow-md placeholder-gray-400"
+                    oninput="handleNameInput()">
+                <p id="playerNameDisplay" class="text-lg mt-3 font-bold text-blue-600 hidden">Welkom, <span id="currentName" class="underline"></span>!</p>
             </section>
-            
-            <section id="stats-panel" class="hidden mb-8 p-6 bg-gray-100 rounded-lg border border-gray-300 shadow-inner w-full">
-                <h2 class="text-xl font-bold mb-5 text-gray-700 flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-blue-500" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
-                    </svg>
-                    Jouw Vechtersstatistieken
-                </h2>
-                <div class="grid grid-cols-2 gap-y-4 gap-x-8 text-left">
-                    
-                    <div class="border-b border-gray-300 pb-2">
-                        <p class="text-sm text-gray-500">Hoogste Niveau (AI)</p>
-                        <p id="stat-max-level" class="text-3xl font-black text-blue-500">0</p>
-                    </div>
-                    <div class="border-b border-gray-300 pb-2">
-                        <p class="text-sm text-gray-500">Winstpercentage (P1)</p>
-                        <p id="stat-win-rate" class="text-3xl font-black text-indigo-500">0%</p>
-                    </div>
 
-                    <div class="border-b border-gray-300 pb-2">
-                        <p class="text-sm text-gray-500">Totaal Gevechten</p>
-                        <p id="stat-total-fights" class="text-3xl font-black text-gray-600">0</p>
-                    </div>
-                    <div class="border-b border-gray-300 pb-2">
-                        <p class="text-sm text-gray-500">Jouw Overwinningen</p>
-                        <p id="stat-player-wins" class="text-3xl font-black text-green-600">0</p>
-                    </div>
-
-                    <div>
-                        <p class="text-sm text-gray-500">Slijpers Opgepakt</p>
-                        <p id="stat-sharpener-pickups" class="text-3xl font-black text-yellow-500">0</p>
-                    </div>
-                    <div>
-                        <p class="text-sm text-gray-500">Totale Schade Toegebracht</p>
-                        <p id="stat-total-damage" class="text-3xl font-black text-red-500">0</p>
-                    </div>
-                    
+            <section id="stats-panel" class="hidden mb-6 p-4 bg-gray-100 rounded-lg border border-gray-300 shadow-inner w-full">
+                <h2 class="text-lg font-bold mb-3 text-gray-700">Jouw Vechtersstatistieken</h2>
+                <div class="grid grid-cols-2 gap-4 text-left">
+                    <div><p class="text-sm text-gray-500">Hoogste Niveau (AI)</p><p id="stat-max-level" class="text-2xl font-black text-blue-500">0</p></div>
+                    <div><p class="text-sm text-gray-500">Winstpercentage (P1)</p><p id="stat-win-rate" class="text-2xl font-black text-indigo-500">0%</p></div>
+                    <div><p class="text-sm text-gray-500">Totaal Gevechten</p><p id="stat-total-fights" class="text-2xl font-black text-gray-600">0</p></div>
+                    <div><p class="text-sm text-gray-500">Jouw Overwinningen</p><p id="stat-player-wins" class="text-2xl font-black text-green-600">0</p></div>
                 </div>
             </section>
 
-
-            <section id="menu-options" class="hidden border-t border-gray-300 pt-8 w-full">
-                <h2 class="text-2xl font-bold text-center mb-6 text-gray-800">Hoofdmenu</h2>
-                <div class="flex flex-col space-y-4">
-                    
-                    <button id="main-game-btn" onclick="handleGameStart('SINGLE_PLAYER')" class="main-btn bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 text-xl w-full">
-                        <span id="game-btn-text">START NIEUW SPEL (TEGEN AI)</span>
-                    </button>
-
-                    <button onclick="handleGameStart('TWO_PLAYER')" 
-                            class="main-btn bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-6 text-xl w-full">
-                        2-Speler Lokaal Gevecht
-                    </button>
-
-                    <button onclick="showMessage('Hoe te Spelen', 'Ontwijk, blokkeer en val de tegenstander aan om te overleven. De puntenslijper geeft een tijdelijke schadeboost. Speler 1 gebruikt WASD en SPATIE. Dubbele S om te dashen. Speler 2 gebruikt IJKL en P. Dubbele K om te dashen.')" 
-                            class="main-btn bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-4 px-6 text-lg w-full">
-                        Instructies
-                    </button>
-                    
-                    <button onclick="showMessage('Winkel Status', 'De Winkel is in aanbouw! Je vechtersstatistieken worden bijgehouden. Wanneer de winkel wordt gelanceerd, kun je verdiende punten besteden om nieuwe vaardigheden en stijlen te ontgrendelen.')" 
-                            class="main-btn bg-gray-200 hover:bg-gray-300 text-blue-600 font-semibold py-4 px-6 text-lg w-full">
-                        Winkel (Binnenkort)
-                    </button>
-
+            <section id="menu-options" class="hidden border-t border-gray-300 pt-6 w-full">
+                <div class="flex flex-col space-y-3">
+                    <button id="main-game-btn" onclick="handleGameStart('SINGLE_PLAYER')" class="main-btn bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 text-lg w-full">START NIEUW SPEL (TEGEN AI)</button>
+                    <button id="two-player-btn" onclick="openMultiplayerModal()" class="main-btn bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 text-lg w-full">2-Speler Online</button>
+                    <button onclick="showMessage('Hoe te Spelen','Ontwijk, blokkeer en val de tegenstander aan...')" class="main-btn bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-3 px-6 text-lg w-full">Instructies</button>
                 </div>
             </section>
         </div>
 
-        <div id="gameUi" class="hidden flex-col items-center w-full"> 
-            
+        <div id="gameUi" class="hidden flex-col items-center w-full">
             <div class="w-full mb-4 flex space-x-4">
-                
                 <div class="w-1/2">
                     <span id="fighter-left-name" class="block text-center text-lg font-bold mb-1 text-blue-500">SPELER 1</span>
-                    <div class="health-bar-bg">
-                        <div id="fighter-left-health" class="health-bar-fill bg-blue-500" style="width: 100%;">
-                        </div>
-                        <span id="fighter-left-percent" class="health-percentage-text text-white text-xs font-bold leading-none" style="right: 4px;">100.0%</span>
-                    </div>
+                    <div class="health-bar-bg"><div id="fighter-left-health" class="health-bar-fill bg-blue-500" style="width:100%"></div><span id="fighter-left-percent" class="health-percentage-text text-white text-xs font-bold leading-none" style="right:4px;">100.0%</span></div>
                 </div>
-
                 <div class="w-1/2">
                     <span id="fighter-right-name" class="block text-center text-lg font-bold mb-1 text-red-500">AI NIVEAU <span id="current-level">1</span></span>
-                    <div class="health-bar-bg">
-                        <div id="fighter-right-health" class="health-bar-fill bg-red-500" style="width: 100%;">
-                        </div>
-                        <span id="fighter-right-percent" class="health-percentage-text text-white text-xs font-bold leading-none" style="left: 4px;">100.0%</span>
-                    </div>
+                    <div class="health-bar-bg"><div id="fighter-right-health" class="health-bar-fill bg-red-500" style="width:100%"></div><span id="fighter-right-percent" class="health-percentage-text text-white text-xs font-bold leading-none" style="left:4px;">100.0%</span></div>
                 </div>
             </div>
 
             <canvas id="gameCanvas" width="700" height="375"></canvas>
-            
-            <p id="game-controls" class="mt-4 text-sm text-gray-600 text-center">
-                
-            </p>
-            <button onclick="handlePauseToMenu()" class="mt-4 main-btn bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 text-sm">
-                Terug naar Menu
-            </button>
+            <p id="game-controls" class="mt-4 text-sm text-gray-600 text-center"></p>
+            <button onclick="handlePauseToMenu()" class="mt-4 main-btn bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 text-sm">Terug naar Menu</button>
         </div>
 
-
-        <footer class="text-center mt-10 text-sm text-gray-600 border-t pt-4 border-gray-200">
+        <footer class="text-center mt-8 text-sm text-gray-600 border-t pt-4 border-gray-200">
             <p class="mb-1">&copy; 2025 Om - Ontwikkeld door Josh Sharma.</p>
-            <p>Ideeën mede mogelijk gemaakt door Om Battacharya en Tijn Beerthuizen.</p>
+            <p class="muted">Ideeën mede mogelijk gemaakt door Om Battacharya en Tijn Beerthuizen.</p>
         </footer>
 
-
         <div id="message-box" class="fixed inset-0 bg-black bg-opacity-30 hidden items-center justify-center p-4 z-50">
-            <div class="bg-white p-8 rounded-xl shadow-2xl max-w-sm w-full border-t-4 border-blue-600">
-                <h3 id="message-title" class="text-xl font-bold mb-4 text-blue-600">Actie</h3>
-                <p id="message-content" class="text-gray-700 mb-6"></p>
-                <button onclick="document.getElementById('message-box').classList.add('hidden'); document.getElementById('message-box').classList.remove('flex');"
-                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg">
-                    Sluiten
-                </button>
+            <div class="bg-white p-6 rounded-xl shadow-2xl max-w-sm w-full border-t-4 border-blue-600">
+                <h3 id="message-title" class="text-xl font-bold mb-3 text-blue-600">Actie</h3>
+                <p id="message-content" class="text-gray-700 mb-4"></p>
+                <button onclick="document.getElementById('message-box').classList.add('hidden'); document.getElementById('message-box').classList.remove('flex');" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg">Sluiten</button>
             </div>
         </div>
+
+        <div id="multiplayer-modal" class="fixed inset-0 bg-black bg-opacity-40 hidden items-center justify-center p-4 z-50">
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl p-6">
+                <div class="flex justify-between items-start">
+                    <h3 class="text-xl font-bold text-gray-800">2-Speler Online</h3>
+                    <button onclick="closeMultiplayerModal()" class="text-gray-400 hover:text-gray-600">✕</button>
+                </div>
+                <div class="grid md:grid-cols-2 gap-4 mt-4">
+                    <div class="p-4 border rounded-lg">
+                        <h4 class="font-semibold mb-2">Host een Kamer</h4>
+                        <p class="text-sm text-gray-500 mb-3">Maak een kamer en deel de 4-cijferige PIN met een vriend.</p>
+                        <button id="hostBtn" onclick="hostGame()" class="main-btn bg-green-600 hover:bg-green-700 text-white w-full py-2 rounded-lg font-semibold">Host Kamer</button>
+                        <div id="hostInfo" class="mt-4 hidden text-center">
+                            <p class="text-sm text-gray-500">PIN</p>
+                            <p id="hostPin" class="text-3xl font-extrabold tracking-wider mt-1"></p>
+                            <p id="hostWaiting" class="text-sm text-gray-500 mt-2">Wacht op speler...</p>
+                            <button onclick="cancelHosting()" class="mt-3 main-btn bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded-lg">Annuleer</button>
+                        </div>
+                    </div>
+                    <div class="p-4 border rounded-lg">
+                        <h4 class="font-semibold mb-2">Join met PIN</h4>
+                        <p class="text-sm text-gray-500 mb-3">Voer de PIN in die je van de host hebt gekregen.</p>
+                        <input id="joinPinInput" maxlength="6" placeholder="1234" class="light-input w-full p-2 rounded mb-3 text-xl font-semibold text-center border-2" />
+                        <button onclick="joinGame()" class="main-btn bg-blue-600 hover:bg-blue-700 text-white w-full py-2 rounded-lg font-semibold">Join Kamer</button>
+                        <div id="joinInfo" class="mt-3 hidden text-center">
+                            <p id="joinMessage" class="text-sm text-gray-500"></p>
+                            <button onclick="leaveRoom()" class="mt-3 main-btn bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded-lg">Verlaat</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script>
         const OM_PLAYER_NAME_KEY = 'om_player_name';
-        const OM_STATS_KEY = 'om_player_stats'; 
-
+        const OM_STATS_KEY = 'om_player_stats';
         const menuUi = document.getElementById('menuUi');
         const gameUi = document.getElementById('gameUi');
         const playerNameInput = document.getElementById('playerNameInput');
@@ -236,7 +131,6 @@
         const currentNameSpan = document.getElementById('currentName');
         const playerNameDisplay = document.getElementById('playerNameDisplay');
         const gameBtnText = document.getElementById('game-btn-text');
-        
         const fighterLeftName = document.getElementById('fighter-left-name');
         const fighterRightName = document.getElementById('fighter-right-name');
         const currentLevelDisplay = document.getElementById('current-level');
@@ -245,75 +139,49 @@
         const fighterLeftPercent = document.getElementById('fighter-left-percent');
         const fighterRightPercent = document.getElementById('fighter-right-percent');
         const gameControls = document.getElementById('game-controls');
-        
         const statsPanel = document.getElementById('stats-panel');
         const statMaxLevel = document.getElementById('stat-max-level');
         const statTotalFights = document.getElementById('stat-total-fights');
         const statPlayerWins = document.getElementById('stat-player-wins');
-        const statWinRate = document.getElementById('stat-win-rate'); 
-        const statSharpenerPickups = document.getElementById('stat-sharpener-pickups'); 
-        const statTotalDamage = document.getElementById('stat-total-damage'); 
-        
+        const statWinRate = document.getElementById('stat-win-rate');
+        const statSharpenerPickups = document.getElementById('stat-sharpener-pickups');
+        const statTotalDamage = document.getElementById('stat-total-damage');
+
         const GAME_MENU = 0;
         const GAME_RUNNING = 1;
         const GAME_OVER = 2;
-        
         const GRAVITY = 0.8;
         const JUMP_VELOCITY = -15;
-        const CANVAS_WIDTH = 700; 
-        const CANVAS_HEIGHT = 375; 
-        const GROUND_Y = CANVAS_HEIGHT - 30; 
-        const SHARPENER_SPAWN_INTERVAL = 400; 
-        const POWER_UP_DURATION = 60 * 10; 
+        const CANVAS_WIDTH = 700;
+        const CANVAS_HEIGHT = 375;
+        const GROUND_Y = CANVAS_HEIGHT - 30;
+        const SHARPENER_SPAWN_INTERVAL = 400;
+        const POWER_UP_DURATION = 60 * 10;
         const ATTACK_COOLDOWN = 30;
         const DASH_DISTANCE = 150;
         const DASH_DURATION = 5;
         const DASH_COOLDOWN = 60;
-        
-        const SERVER_URL = 'joshthedev888-server.onrender.com'; 
-        const socket = io(SERVER_URL);
-        let isOnlineGame = false;
 
+        const SERVER_URL = 'https://joshthedev888-server.onrender.com';
+        const socket = io(SERVER_URL, { autoConnect: false });
+        let isOnlineGame = false;
+        let hostingPin = null;
 
         let gameState = GAME_MENU;
-        let gameMode = 'SINGLE_PLAYER'; 
+        let gameMode = 'SINGLE_PLAYER';
         let savedLevel = 0;
         let playerName = "";
-        
-        let player = { 
-            x: 120, y: GROUND_Y, health: 100, isAttacking: false, attackTimer: 0, 
-            speed: 6, direction: 1, 
-            isJumping: false, velocityY: 0, isBlocking: false, 
-            hasSharpener: false, sharpenerTimer: 0,
-            isDashing: false, dashTimer: 0, dashCooldown: 0, lastMoveKey: null, lastMoveTime: 0,
-            level: 1 
-        };
-        let fighterRight = { 
-            x: CANVAS_WIDTH - 120, y: GROUND_Y, health: 100, isAttacking: false, attackTimer: 0, 
-            speed: 6, direction: -1, 
-            isJumping: false, velocityY: 0, isBlocking: false, 
-            hasSharpener: false, sharpenerTimer: 0,
-            isDashing: false, dashTimer: 0, dashCooldown: 0, lastMoveKey: null, lastMoveTime: 0,
-            level: 1 
-        };
-        
+
+        let player = { x: 120, y: GROUND_Y, health: 100, isAttacking: false, attackTimer: 0, speed: 6, direction: 1, isJumping: false, velocityY: 0, isBlocking: false, hasSharpener: false, sharpenerTimer: 0, isDashing: false, dashTimer: 0, dashCooldown: 0, lastMoveKey: null, lastMoveTime: 0, level: 1 };
+        let fighterRight = { x: CANVAS_WIDTH - 120, y: GROUND_Y, health: 100, isAttacking: false, attackTimer: 0, speed: 6, direction: -1, isJumping: false, velocityY: 0, isBlocking: false, hasSharpener: false, sharpenerTimer: 0, isDashing: false, dashTimer: 0, dashCooldown: 0, lastMoveKey: null, lastMoveTime: 0, level: 1 };
+
         let keys = {};
         let aiActionTimer = 0;
         let animationFrameId;
-
         let sharpener = { x: 0, y: 0, active: false, timer: 0 };
         let sharpenerSpawnTimer = 0;
+        let playerStats = { maxLevel: 0, totalFights: 0, aiWins: 0, playerWins: 0, sharpenerPickups: 0, totalDamageDealt: 0, winRate: 0 };
 
-        let playerStats = {
-            maxLevel: 0,
-            totalFights: 0,
-            aiWins: 0,
-            playerWins: 0,
-            sharpenerPickups: 0,
-            totalDamageDealt: 0, 
-            winRate: 0, 
-        };
-        
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         canvas.width = CANVAS_WIDTH;
@@ -326,28 +194,19 @@
                     playerStats = JSON.parse(stats);
                     playerStats.sharpenerPickups = playerStats.sharpenerPickups || 0;
                     playerStats.totalDamageDealt = playerStats.totalDamageDealt || 0;
-                    playerStats.winRate = playerStats.totalFights > 0 
-                        ? ((playerStats.playerWins / playerStats.totalFights) * 100).toFixed(1) 
-                        : 0;
+                    playerStats.winRate = playerStats.totalFights > 0 ? ((playerStats.playerWins / playerStats.totalFights) * 100).toFixed(1) : 0;
                 }
-            } catch (error) {
-                console.error("Fout bij laden van statistieken:", error);
-            }
+            } catch (e) {}
         }
-        
+
         function saveStats() {
-             try {
+            try {
                 localStorage.setItem(OM_STATS_KEY, JSON.stringify(playerStats));
-            } catch (error) {
-                console.error("Fout bij opslaan van statistieken:", error);
-            }
+            } catch (e) {}
         }
 
         function updateStatsDisplay() {
-            playerStats.winRate = playerStats.totalFights > 0 
-                ? ((playerStats.playerWins / playerStats.totalFights) * 100).toFixed(1) 
-                : 0;
-
+            playerStats.winRate = playerStats.totalFights > 0 ? ((playerStats.playerWins / playerStats.totalFights) * 100).toFixed(1) : 0;
             statMaxLevel.textContent = playerStats.maxLevel;
             statTotalFights.textContent = playerStats.totalFights;
             statPlayerWins.textContent = playerStats.playerWins;
@@ -360,32 +219,15 @@
             elementToHide.classList.add('hidden');
             elementToShow.classList.remove('hidden');
         }
-        
+
         function initializeFighters(mode, level) {
             gameMode = mode;
             const startLevel = level || 1;
-            
-            player = { 
-                x: 120, y: GROUND_Y, health: 100, isAttacking: false, attackTimer: 0, 
-                speed: 6, direction: 1, 
-                isJumping: false, velocityY: 0, isBlocking: false, 
-                hasSharpener: false, sharpenerTimer: 0,
-                isDashing: false, dashTimer: 0, dashCooldown: 0, lastMoveKey: null, lastMoveTime: 0,
-                level: 1 
-            };
-            
-            fighterRight = { 
-                x: CANVAS_WIDTH - 120, y: GROUND_Y, health: 100, isAttacking: false, attackTimer: 0, 
-                speed: 6, direction: -1, 
-                isJumping: false, velocityY: 0, isBlocking: false, 
-                hasSharpener: false, sharpenerTimer: 0,
-                isDashing: false, dashTimer: 0, dashCooldown: 0, lastMoveKey: null, lastMoveTime: 0,
-                level: startLevel 
-            };
-
+            player = { x: 120, y: GROUND_Y, health: 100, isAttacking: false, attackTimer: 0, speed: 6, direction: 1, isJumping: false, velocityY: 0, isBlocking: false, hasSharpener: false, sharpenerTimer: 0, isDashing: false, dashTimer: 0, dashCooldown: 0, lastMoveKey: null, lastMoveTime: 0, level: 1 };
+            fighterRight = { x: CANVAS_WIDTH - 120, y: GROUND_Y, health: 100, isAttacking: false, attackTimer: 0, speed: 6, direction: -1, isJumping: false, velocityY: 0, isBlocking: false, hasSharpener: false, sharpenerTimer: 0, isDashing: false, dashTimer: 0, dashCooldown: 0, lastMoveKey: null, lastMoveTime: 0, level: startLevel };
             sharpener.active = false;
             sharpenerSpawnTimer = 0;
-            aiActionTimer = 0; 
+            aiActionTimer = 0;
         }
 
         function showMessage(title, content) {
@@ -396,32 +238,22 @@
         }
 
         function checkGameState() {
-            loadStats(); 
-            
+            loadStats();
             savedLevel = playerStats.maxLevel;
-
-            if (savedLevel > 0) {
-                gameBtnText.textContent = `HERVAT GEVECHT: NIVEAU ${savedLevel} (TEGEN AI)`;
-            } else {
-                gameBtnText.textContent = 'START NIEUW SPEL (TEGEN AI)';
-            }
-            
-            updateStatsDisplay(); 
+            if (savedLevel > 0) gameBtnText.textContent = `HERVAT GEVECHT: NIVEAU ${savedLevel} (TEGEN AI)`;
+            else gameBtnText.textContent = 'START NIEUW SPEL (TEGEN AI)';
+            updateStatsDisplay();
         }
 
         window.handleNameInput = function() {
             playerName = playerNameInput.value.trim();
-
             if (playerName.length >= 1) {
                 menuOptions.classList.remove('hidden');
                 playerNameDisplay.classList.remove('hidden');
                 currentNameSpan.textContent = playerName;
-                
                 statsPanel.classList.remove('hidden');
-                
                 localStorage.setItem(OM_PLAYER_NAME_KEY, playerName);
                 checkGameState();
-
             } else {
                 menuOptions.classList.add('hidden');
                 playerNameDisplay.classList.add('hidden');
@@ -429,81 +261,59 @@
                 localStorage.removeItem(OM_PLAYER_NAME_KEY);
             }
         }
-        
+
         window.handleGameStart = function(mode) {
             const currentName = currentNameSpan.textContent;
             if (currentName.length < 1) {
-                 showMessage('Fout', 'Voer eerst een naam in voor speler 1.');
-                 return;
+                showMessage('Fout', 'Voer eerst een naam in voor speler 1.');
+                return;
             }
-            
             gameMode = mode;
-
             if (gameMode === 'TWO_PLAYER') {
-                isOnlineGame = true;
-                showMessage("Verbinding Maken", "Zoekende naar een tegenstander...");
-                socket.emit('requestMatch', { playerName: playerName });
-                return; 
+                openMultiplayerModal();
+                return;
             }
-            
             isOnlineGame = false;
             const startLevel = savedLevel > 0 && mode === 'SINGLE_PLAYER' ? savedLevel : 1;
-            
             initializeFighters(mode, startLevel);
-
             transitionTo(gameUi, menuUi);
-            
             gameState = GAME_RUNNING;
             updateGameUI();
             gameLoop();
         }
-        
-        window.handlePauseToMenu = function() {
-            if (gameState !== GAME_RUNNING && gameState !== GAME_OVER) return; 
 
+        window.handlePauseToMenu = function() {
+            if (gameState !== GAME_RUNNING && gameState !== GAME_OVER) return;
             gameState = GAME_MENU;
             cancelAnimationFrame(animationFrameId);
-            
             transitionTo(menuUi, gameUi);
-            
-            checkGameState(); 
+            checkGameState();
         }
 
         function handleGameOver(winnerName, loserLevel) {
             gameState = GAME_OVER;
             cancelAnimationFrame(animationFrameId);
-            
             playerStats.totalFights++;
-
             if (gameMode === 'SINGLE_PLAYER') {
-                playerStats.aiWins++; 
+                playerStats.aiWins++;
                 showMessage("GEVECHT VERLOREN!", `${playerName} heeft gestreden tot Niveau ${fighterRight.level}. Probeer het opnieuw!`);
-                savedLevel = 0; 
+                savedLevel = 0;
             } else {
-                if (winnerName === playerName) {
-                    playerStats.playerWins++;
-                } else {
-                    playerStats.aiWins++;
-                }
+                if (winnerName === playerName) playerStats.playerWins++;
+                else playerStats.aiWins++;
                 showMessage("GEVECHT VOORBIJ!", `${winnerName} heeft gewonnen!`);
             }
-            
-            saveStats(); 
-            checkGameState(); 
+            saveStats();
+            checkGameState();
         }
 
         function handleLevelUp() {
             const nextLevel = fighterRight.level + 1;
-            
-            playerStats.totalFights++; 
-            playerStats.playerWins++; 
-            
-            playerStats.maxLevel = Math.max(playerStats.maxLevel, nextLevel); 
-            
-            saveStats(); 
-            
+            playerStats.totalFights++;
+            playerStats.playerWins++;
+            playerStats.maxLevel = Math.max(playerStats.maxLevel, nextLevel);
+            saveStats();
             showMessage("NIVEAU VOLTOOID!", `De AI is nu Niveau ${nextLevel} geworden. Maak je klaar voor een zwaarder gevecht!`);
-            
             setTimeout(() => {
                 initializeFighters(gameMode, nextLevel);
                 updateGameUI();
@@ -514,13 +324,10 @@
         function updateGameUI() {
             const leftHealth = Math.max(0, player.health);
             const rightHealth = Math.max(0, fighterRight.health);
-
             fighterLeftName.textContent = playerName;
-            
             fighterLeftHealthBar.style.width = `${leftHealth}%`;
-            fighterLeftHealthBar.style.backgroundColor = leftHealth < 25 ? '#ef4444' : (player.hasSharpener ? '#facc15' : '#3b82f6'); 
+            fighterLeftHealthBar.style.backgroundColor = leftHealth < 25 ? '#ef4444' : (player.hasSharpener ? '#facc15' : '#3b82f6');
             fighterLeftPercent.textContent = `${leftHealth.toFixed(1)}%`;
-            
             if (gameMode === 'SINGLE_PLAYER') {
                 fighterRightName.textContent = `AI NIVEAU ${fighterRight.level}`;
                 currentLevelDisplay.textContent = fighterRight.level;
@@ -536,9 +343,8 @@
                 `;
             }
             fighterRightHealthBar.style.width = `${rightHealth}%`;
-            fighterRightHealthBar.style.backgroundColor = rightHealth < 25 ? '#ef4444' : (fighterRight.hasSharpener ? '#facc15' : '#ef4444'); 
+            fighterRightHealthBar.style.backgroundColor = rightHealth < 25 ? '#ef4444' : (fighterRight.hasSharpener ? '#facc15' : '#ef4444');
             fighterRightPercent.textContent = `${rightHealth.toFixed(1)}%`;
-
             fighterLeftPercent.style.color = leftHealth > 60 ? '#ffffff' : '#333333';
             fighterRightPercent.style.color = rightHealth > 60 ? '#ffffff' : '#333333';
         }
@@ -547,77 +353,63 @@
             const x = fighter.x;
             const y = fighter.y;
             const direction = fighter.direction;
-            
-            if (fighter.health <= 0) return; 
-
+            if (fighter.health <= 0) return;
             ctx.strokeStyle = fighter.isDashing ? '#facc15' : color;
             ctx.lineWidth = fighter.isDashing ? 6 : 4;
             ctx.beginPath();
-            
-            const headY = y - 80; 
-            const bodyY = y - 70; 
-            const baseBodyY = y - 30; 
+            const headY = y - 80;
+            const bodyY = y - 70;
+            const baseBodyY = y - 30;
             const armY = bodyY + 10;
-
             ctx.arc(x, headY, 10, 0, Math.PI * 2);
-            
             ctx.moveTo(x, bodyY);
             ctx.lineTo(x, baseBodyY);
-
             ctx.moveTo(x, baseBodyY);
             ctx.lineTo(x - 15 * direction, y);
             ctx.moveTo(x, baseBodyY);
             ctx.lineTo(x + 15 * direction, y);
-
             ctx.moveTo(x, armY);
-            if (fighter.isAttacking) {
-                ctx.lineTo(x + 30 * direction, armY - 15); 
-            } else if (fighter.isBlocking || fighter.isDashing) {
+            if (fighter.isAttacking) ctx.lineTo(x + 30 * direction, armY - 15);
+            else if (fighter.isBlocking || fighter.isDashing) {
                 ctx.lineTo(x + 10 * direction, armY + 20);
                 ctx.moveTo(x, armY);
                 ctx.lineTo(x - 10 * direction, armY + 20);
             } else {
                 ctx.lineTo(x + 15 * direction, armY + 10);
                 ctx.moveTo(x, armY);
-                ctx.lineTo(x - 15 * direction, armY + 10); 
+                ctx.lineTo(x - 15 * direction, armY + 10);
             }
             ctx.stroke();
-
-            ctx.fillStyle = '#654321'; 
+            ctx.fillStyle = '#654321';
             ctx.strokeStyle = '#000000';
             ctx.lineWidth = 1;
-
             let pencilTipX, pencilTipY, pencilBaseX, pencilBaseY;
-
             if (fighter.isAttacking) {
                 pencilBaseX = x + 25 * direction;
                 pencilBaseY = armY - 10;
-                pencilTipX = x + 55 * direction; 
+                pencilTipX = x + 55 * direction;
                 pencilTipY = armY - 15;
             } else {
                 pencilBaseX = x + 15 * direction;
                 pencilBaseY = armY;
-                pencilTipX = x + 35 * direction; 
+                pencilTipX = x + 35 * direction;
                 pencilTipY = armY - 5;
             }
-
             ctx.beginPath();
             ctx.moveTo(pencilBaseX, pencilBaseY);
             ctx.lineTo(pencilTipX, pencilTipY);
             ctx.lineTo(pencilTipX, pencilTipY + 5);
             ctx.lineTo(pencilBaseX, pencilBaseY + 5);
             ctx.closePath();
-            
-            ctx.fillStyle = fighter.hasSharpener ? '#facc15' : '#654321'; 
+            ctx.fillStyle = fighter.hasSharpener ? '#facc15' : '#654321';
             ctx.fill();
             ctx.stroke();
         }
 
         function drawGround() {
-            ctx.fillStyle = '#b8860b'; 
+            ctx.fillStyle = '#b8860b';
             ctx.fillRect(0, GROUND_Y, CANVAS_WIDTH, CANVAS_HEIGHT - GROUND_Y);
-            
-            ctx.strokeStyle = '#8b4513'; 
+            ctx.strokeStyle = '#8b4513';
             ctx.lineWidth = 2;
             ctx.beginPath();
             ctx.moveTo(0, GROUND_Y);
@@ -626,21 +418,16 @@
         }
 
         function drawSharpener() {
-             if (!sharpener.active) return;
-
+            if (!sharpener.active) return;
             const x = sharpener.x;
-            const y = sharpener.y - 15; 
-            
-            ctx.fillStyle = '#ef4444'; 
+            const y = sharpener.y - 15;
+            ctx.fillStyle = '#ef4444';
             ctx.fillRect(x - 5, y - 10, 10, 15);
-            
-            ctx.fillStyle = '#cccccc'; 
+            ctx.fillStyle = '#cccccc';
             ctx.fillRect(x - 5, y + 5, 10, 5);
-            
-            ctx.fillStyle = '#cc8844'; 
+            ctx.fillStyle = '#cc8844';
             ctx.fillRect(x - 5, y + 10, 10, 30);
-            
-            ctx.fillStyle = '#333333'; 
+            ctx.fillStyle = '#333333';
             ctx.beginPath();
             ctx.moveTo(x - 5, y + 40);
             ctx.lineTo(x + 5, y + 40);
@@ -662,21 +449,16 @@
 
         function startDash(fighter, directionKey) {
             const now = Date.now();
-            const DASH_TIME_WINDOW = 300; 
-
+            const DASH_TIME_WINDOW = 300;
             if (fighter.dashCooldown > 0 || fighter.isJumping || isOnlineGame) return;
-
             if (fighter.lastMoveKey === directionKey && now - fighter.lastMoveTime < DASH_TIME_WINDOW) {
                 fighter.isDashing = true;
-                fighter.dashTimer = DASH_DURATION; 
+                fighter.dashTimer = DASH_DURATION;
                 fighter.dashCooldown = DASH_COOLDOWN;
-                fighter.direction = directionKey === 'a' || directionKey === 'j' || directionKey === 's' || directionKey === 'k' ? (fighter.direction === -1 ? -1 : 1) : 1; 
-                if (directionKey === 's' || directionKey === 'k') { 
-                    if (fighter === player) {
-                        fighter.direction = keys['a'] ? -1 : (keys['d'] ? 1 : fighter.direction);
-                    } else if (fighter === fighterRight) {
-                        fighter.direction = keys['j'] ? -1 : (keys['l'] ? 1 : fighter.direction);
-                    }
+                fighter.direction = directionKey === 'a' || directionKey === 'j' || directionKey === 's' || directionKey === 'k' ? (fighter.direction === -1 ? -1 : 1) : 1;
+                if (directionKey === 's' || directionKey === 'k') {
+                    if (fighter === player) fighter.direction = keys['a'] ? -1 : (keys['d'] ? 1 : fighter.direction);
+                    else if (fighter === fighterRight) fighter.direction = keys['j'] ? -1 : (keys['l'] ? 1 : fighter.direction);
                 }
             }
             fighter.lastMoveKey = directionKey;
@@ -684,85 +466,37 @@
         }
 
         function updateDash(fighter) {
-            if (fighter.dashCooldown > 0) {
-                fighter.dashCooldown--;
-            }
-
+            if (fighter.dashCooldown > 0) fighter.dashCooldown--;
             if (fighter.isDashing) {
                 fighter.x += fighter.direction * (DASH_DISTANCE / DASH_DURATION);
                 fighter.dashTimer--;
-                
-                if (fighter.dashTimer <= 0) {
-                    fighter.isDashing = false;
-                }
-                
+                if (fighter.dashTimer <= 0) fighter.isDashing = false;
                 fighter.x = Math.max(20, Math.min(fighter.x, CANVAS_WIDTH - 20));
             }
         }
 
         function handleMovement() {
-            if (isOnlineGame) return; 
-            
-            if (keys['s'] && !player.isJumping) { 
-                startDash(player, 's');
-            } else if (keys['k'] && !fighterRight.isJumping && gameMode === 'TWO_PLAYER') {
-                startDash(fighterRight, 'k');
-            }
-            
-            if (player.isDashing) {
-                updateDash(player);
-                applyPhysics(player);
-                return;
-            }
-
-            if (keys['a']) {
-                player.x = Math.max(player.x - player.speed, 20);
-                player.direction = -1;
-            }
-            if (keys['d']) {
-                player.x = Math.min(player.x + player.speed, CANVAS_WIDTH - 20); 
-                player.direction = 1;
-            }
-            if (keys['w'] && !player.isJumping) {
-                player.isJumping = true;
-                player.velocityY = JUMP_VELOCITY;
-            }
-
+            if (isOnlineGame) return;
+            if (keys['s'] && !player.isJumping) startDash(player, 's');
+            else if (keys['k'] && !fighterRight.isJumping && gameMode === 'TWO_PLAYER') startDash(fighterRight, 'k');
+            if (player.isDashing) { updateDash(player); applyPhysics(player); return; }
+            if (keys['a']) { player.x = Math.max(player.x - player.speed, 20); player.direction = -1; }
+            if (keys['d']) { player.x = Math.min(player.x + player.speed, CANVAS_WIDTH - 20); player.direction = 1; }
+            if (keys['w'] && !player.isJumping) { player.isJumping = true; player.velocityY = JUMP_VELOCITY; }
             player.isBlocking = keys['s'];
             player.isAttacking = keys[' '];
-
             if (gameMode === 'TWO_PLAYER') {
-                if (fighterRight.isDashing) {
-                    updateDash(fighterRight);
-                    applyPhysics(fighterRight);
-                    return;
-                }
-                
-                if (keys['j']) {
-                    fighterRight.x = Math.max(fighterRight.x - fighterRight.speed, 20);
-                    fighterRight.direction = -1;
-                }
-                if (keys['l']) {
-                    fighterRight.x = Math.min(fighterRight.x + fighterRight.speed, CANVAS_WIDTH - 20);
-                    fighterRight.direction = 1;
-                }
-                if (keys['i'] && !fighterRight.isJumping) {
-                    fighterRight.isJumping = true;
-                    fighterRight.velocityY = JUMP_VELOCITY;
-                }
+                if (fighterRight.isDashing) { updateDash(fighterRight); applyPhysics(fighterRight); return; }
+                if (keys['j']) { fighterRight.x = Math.max(fighterRight.x - fighterRight.speed, 20); fighterRight.direction = -1; }
+                if (keys['l']) { fighterRight.x = Math.min(fighterRight.x + fighterRight.speed, CANVAS_WIDTH - 20); fighterRight.direction = 1; }
+                if (keys['i'] && !fighterRight.isJumping) { fighterRight.isJumping = true; fighterRight.velocityY = JUMP_VELOCITY; }
                 fighterRight.isBlocking = keys['k'];
                 fighterRight.isAttacking = keys['p'];
-            } else {
-                handleAILogic(fighterRight, player);
-            }
-
+            } else handleAILogic(fighterRight, player);
             applyPhysics(player);
             applyPhysics(fighterRight);
-            
             updateDash(player);
-            if (gameMode === 'TWO_PLAYER') {
-                updateDash(fighterRight);
-            }
+            if (gameMode === 'TWO_PLAYER') updateDash(fighterRight);
         }
 
         function handleAILogic(ai, opponent) {
@@ -770,65 +504,28 @@
             const levelFactor = Math.min(10, ai.level);
             const distance = Math.abs(ai.x - opponent.x);
             const isCloser = ai.x > opponent.x;
-
-            if (ai.isDashing) {
-                updateDash(ai);
-                return;
-            }
-
+            if (ai.isDashing) { updateDash(ai); return; }
             if (aiActionTimer <= 0) {
-                aiActionTimer = Math.max(20, 60 - levelFactor * 5); 
-                
+                aiActionTimer = Math.max(20, 60 - levelFactor * 5);
                 if (distance < 70) {
-                    if (Math.random() < 0.6 + levelFactor * 0.03) {
-                        ai.isAttacking = true;
-                        ai.isBlocking = false;
-                    } else if (Math.random() < 0.4 + levelFactor * 0.03) {
-                        ai.isBlocking = true;
-                        ai.isAttacking = false;
-                    } else if (ai.dashCooldown === 0 && Math.random() < 0.2 + levelFactor * 0.02) {
-                         ai.isDashing = true;
-                         ai.dashTimer = DASH_DURATION;
-                         ai.dashCooldown = DASH_COOLDOWN;
-                         ai.direction = isCloser ? 1 : -1; 
-                    } else if (Math.random() < 0.2 && !ai.isJumping) {
-                         ai.isJumping = true;
-                         ai.velocityY = JUMP_VELOCITY;
-                    } else {
-                        ai.isAttacking = false;
-                        ai.isBlocking = false;
-                    }
+                    if (Math.random() < 0.6 + levelFactor * 0.03) { ai.isAttacking = true; ai.isBlocking = false; }
+                    else if (Math.random() < 0.4 + levelFactor * 0.03) { ai.isBlocking = true; ai.isAttacking = false; }
+                    else if (ai.dashCooldown === 0 && Math.random() < 0.2 + levelFactor * 0.02) { ai.isDashing = true; ai.dashTimer = DASH_DURATION; ai.dashCooldown = DASH_COOLDOWN; ai.direction = isCloser ? 1 : -1; }
+                    else if (Math.random() < 0.2 && !ai.isJumping) { ai.isJumping = true; ai.velocityY = JUMP_VELOCITY; }
+                    else { ai.isAttacking = false; ai.isBlocking = false; }
                 } else if (distance > 150) {
-                    if (isCloser) {
-                        ai.x -= ai.speed;
-                        ai.direction = -1;
-                    } else {
-                        ai.x += ai.speed;
-                        ai.direction = 1;
-                    }
-                    ai.isAttacking = false;
-                    ai.isBlocking = false;
-
+                    if (isCloser) { ai.x -= ai.speed; ai.direction = -1; } else { ai.x += ai.speed; ai.direction = 1; }
+                    ai.isAttacking = false; ai.isBlocking = false;
                 } else {
-                    ai.isAttacking = false;
-                    ai.isBlocking = false;
-                    if (Math.random() < 0.15 && !ai.isJumping) {
-                        ai.isJumping = true;
-                        ai.velocityY = JUMP_VELOCITY;
-                    }
+                    ai.isAttacking = false; ai.isBlocking = false;
+                    if (Math.random() < 0.15 && !ai.isJumping) { ai.isJumping = true; ai.velocityY = JUMP_VELOCITY; }
                 }
             } else {
                 ai.isAttacking = ai.isAttacking && aiActionTimer > (Math.max(10, 20 - levelFactor));
                 ai.isBlocking = ai.isBlocking && aiActionTimer > (Math.max(10, 20 - levelFactor));
-
                 if (!ai.isAttacking && !ai.isBlocking && !ai.isDashing) {
-                    if (ai.x > opponent.x) {
-                        ai.x = Math.max(ai.x - ai.speed / 2, 20); 
-                        ai.direction = -1;
-                    } else {
-                        ai.x = Math.min(ai.x + ai.speed / 2, CANVAS_WIDTH - 20);
-                        ai.direction = 1;
-                    }
+                    if (ai.x > opponent.x) { ai.x = Math.max(ai.x - ai.speed / 2, 20); ai.direction = -1; }
+                    else { ai.x = Math.min(ai.x + ai.speed / 2, CANVAS_WIDTH - 20); ai.direction = 1; }
                 }
             }
         }
@@ -836,13 +533,11 @@
         function checkCollision(fighterA, fighterB) {
             const distance = Math.abs(fighterA.x - fighterB.x);
             const verticalClearance = Math.abs(fighterA.y - fighterB.y);
-            
             return distance < 60 && verticalClearance < 50;
         }
 
         function handleCombat() {
-            if (isOnlineGame) return; 
-            
+            if (isOnlineGame) return;
             checkAttack(player, fighterRight);
             checkAttack(fighterRight, player);
             checkSharpenerPickup(player);
@@ -851,43 +546,29 @@
 
         function checkAttack(attacker, defender) {
             if (attacker.isAttacking && attacker.attackTimer === 0 && checkCollision(attacker, defender) && !attacker.isDashing) {
-                attacker.attackTimer = ATTACK_COOLDOWN; 
-                
+                attacker.attackTimer = ATTACK_COOLDOWN;
                 const damageMultiplier = attacker.hasSharpener ? 2 : 1;
-                const baseDamage = 5 * damageMultiplier; 
-
+                const baseDamage = 5 * damageMultiplier;
                 if (defender.isBlocking || defender.isDashing) {
-                    const blockDamage = Math.max(1, baseDamage * 0.2); 
+                    const blockDamage = Math.max(1, baseDamage * 0.2);
                     defender.health -= blockDamage;
-                    if (attacker === player) {
-                        playerStats.totalDamageDealt += blockDamage;
-                    }
+                    if (attacker === player) playerStats.totalDamageDealt += blockDamage;
                 } else {
                     defender.health -= baseDamage;
-                    if (attacker === player) {
-                        playerStats.totalDamageDealt += baseDamage;
-                    }
+                    if (attacker === player) playerStats.totalDamageDealt += baseDamage;
                 }
-                
                 defender.health = Math.max(0, defender.health);
             }
-            if (attacker.attackTimer > 0) {
-                attacker.attackTimer--;
-            }
+            if (attacker.attackTimer > 0) attacker.attackTimer--;
         }
 
         function checkSharpenerPickup(fighter) {
             if (!sharpener.active || isOnlineGame) return;
-
-            const distance = Math.sqrt(
-                Math.pow(fighter.x - sharpener.x, 2) +
-                Math.pow(fighter.y - sharpener.y, 2)
-            );
-
-            if (distance < 50) { 
+            const distance = Math.sqrt(Math.pow(fighter.x - sharpener.x, 2) + Math.pow(fighter.y - sharpener.y, 2));
+            if (distance < 50) {
                 fighter.hasSharpener = true;
                 fighter.sharpenerTimer = POWER_UP_DURATION;
-                sharpener.active = false; 
+                sharpener.active = false;
                 sharpener.timer = 0;
                 playerStats.sharpenerPickups++;
                 saveStats();
@@ -896,81 +577,51 @@
 
         function updateSharpener() {
             if (isOnlineGame) return;
-            
             if (sharpener.active) {
                 sharpener.timer++;
-                if (sharpener.timer > 60 * 10) { 
-                    sharpener.active = false;
-                    sharpener.timer = 0;
-                }
+                if (sharpener.timer > 60 * 10) { sharpener.active = false; sharpener.timer = 0; }
             } else {
                 sharpenerSpawnTimer++;
                 if (sharpenerSpawnTimer > SHARPENER_SPAWN_INTERVAL) {
-                    sharpener.x = Math.random() * (CANVAS_WIDTH - 100) + 50; 
+                    sharpener.x = Math.random() * (CANVAS_WIDTH - 100) + 50;
                     sharpener.y = GROUND_Y;
                     sharpener.active = true;
                     sharpenerSpawnTimer = 0;
                     sharpener.timer = 0;
                 }
             }
-            
-            if (player.hasSharpener) {
-                player.sharpenerTimer--;
-                if (player.sharpenerTimer <= 0) {
-                    player.hasSharpener = false;
-                }
-            }
-            if (fighterRight.hasSharpener) {
-                fighterRight.sharpenerTimer--;
-                if (fighterRight.sharpenerTimer <= 0) {
-                    fighterRight.hasSharpener = false;
-                }
-            }
+            if (player.hasSharpener) { player.sharpenerTimer--; if (player.sharpenerTimer <= 0) player.hasSharpener = false; }
+            if (fighterRight.hasSharpener) { fighterRight.sharpenerTimer--; if (fighterRight.sharpenerTimer <= 0) fighterRight.hasSharpener = false; }
         }
-
 
         function gameLoop() {
             if (gameState !== GAME_RUNNING) return;
-
             ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-
             drawGround();
             updateSharpener();
             drawSharpener();
-            
             handleMovement();
-            handleCombat(); 
-
-            drawFighter(player, '#3b82f6'); 
-            drawFighter(fighterRight, '#ef4444'); 
-
+            handleCombat();
+            drawFighter(player, '#3b82f6');
+            drawFighter(fighterRight, '#ef4444');
             updateGameUI();
-
-            if (!isOnlineGame && player.health <= 0) {
-                handleGameOver(fighterRightName.textContent, player.level);
-                return;
-            }
+            if (!isOnlineGame && player.health <= 0) { handleGameOver(fighterRightName.textContent, player.level); return; }
             if (!isOnlineGame && fighterRight.health <= 0) {
-                if (gameMode === 'SINGLE_PLAYER') {
-                    handleLevelUp();
-                } else {
-                    handleGameOver(fighterLeftName.textContent, fighterRight.level);
-                }
+                if (gameMode === 'SINGLE_PLAYER') handleLevelUp();
+                else handleGameOver(fighterLeftName.textContent, fighterRight.level);
                 return;
             }
-            
             animationFrameId = requestAnimationFrame(gameLoop);
         }
-        
+
         socket.on('matchFound', (data) => {
+            document.getElementById('multiplayer-modal').classList.add('hidden');
             showMessage("Gevecht Gevonden!", `Je vecht tegen ${data.opponentName}.`);
-            
-            transitionTo(gameUi, menuUi); 
-            
+            transitionTo(gameUi, menuUi);
             player.id = socket.id;
             player.x = data.isPlayer1 ? 120 : CANVAS_WIDTH - 120;
             fighterRight.x = data.isPlayer1 ? CANVAS_WIDTH - 120 : 120;
-            
+            isOnlineGame = true;
             gameState = GAME_RUNNING;
             updateGameUI();
             gameLoop();
@@ -978,72 +629,94 @@
 
         socket.on('updateState', (state) => {
             if (gameState !== GAME_RUNNING) return;
-
             const myState = state.p1.id === socket.id ? state.p1 : state.p2;
             const remoteState = state.p1.id === socket.id ? state.p2 : state.p1;
-
-            Object.assign(player, myState); 
+            Object.assign(player, myState);
             Object.assign(fighterRight, remoteState);
         });
 
         socket.on('matchOver', (data) => {
-            handleGameOver(data.winnerName, data.loserLevel); 
+            handleGameOver(data.winnerName, data.loserLevel);
+            if (data.reason) showMessage('Match Over', data.reason);
+            isOnlineGame = false;
+            hostingPin = null;
         });
 
-        socket.on('error', (message) => {
-            showMessage("Netwerkfout", message);
-            isOnlineGame = false;
+        socket.on('gameCreated', (data) => {
+            hostingPin = data.pin;
+            const hostInfo = document.getElementById('hostInfo');
+            const hostPinEl = document.getElementById('hostPin');
+            hostPinEl.textContent = data.pin;
+            hostInfo.classList.remove('hidden');
+            socket.emit('requestMatch', {}); // not necessary but harmless; server uses host flow
         });
+
+        socket.on('joinFailed', (data) => {
+            showMessage('Join Fout', data.message || 'Kon niet joinen.');
+        });
+
+        function openMultiplayerModal() {
+            document.getElementById('multiplayer-modal').classList.remove('hidden');
+        }
+
+        function closeMultiplayerModal() {
+            document.getElementById('multiplayer-modal').classList.add('hidden');
+        }
+
+        function hostGame() {
+            if (!playerName || playerName.length < 1) { showMessage('Fout', 'Voer eerst je naam in.'); return; }
+            if (!socket.connected) socket.connect();
+            socket.emit('hostGame', { playerName: playerName });
+        }
+
+        function cancelHosting() {
+            hostingPin = null;
+            document.getElementById('hostInfo').classList.add('hidden');
+            if (socket && socket.connected) socket.emit('leaveRoom', { pin: hostingPin });
+        }
+
+        function joinGame() {
+            const pin = document.getElementById('joinPinInput').value.trim();
+            if (!playerName || playerName.length < 1) { showMessage('Fout', 'Voer eerst je naam in.'); return; }
+            if (!pin || pin.length < 3) { showMessage('Fout', 'Voer een geldige PIN in.'); return; }
+            if (!socket.connected) socket.connect();
+            socket.emit('joinGame', { pin: pin, playerName: playerName });
+            document.getElementById('joinInfo').classList.remove('hidden');
+            document.getElementById('joinMessage').textContent = 'Proberen te verbinden...';
+        }
+
+        function leaveRoom() {
+            document.getElementById('joinInfo').classList.add('hidden');
+            document.getElementById('joinMessage').textContent = '';
+            if (socket && socket.connected) socket.emit('leaveRoom', {});
+            closeMultiplayerModal();
+        }
 
         document.addEventListener('keydown', (e) => {
             const key = e.key.toLowerCase();
             keys[key] = true;
-
             if (isOnlineGame) {
                 socket.emit('playerInput', { key: key, state: 'down' });
                 return;
             }
-
-            if (key === 'a' || key === 'd') {
-                player.lastMoveKey = key;
-                player.lastMoveTime = Date.now();
-            }
-            if (key === 's') {
-                player.lastMoveKey = key;
-                player.lastMoveTime = Date.now();
-            }
-
+            if (key === 'a' || key === 'd') { player.lastMoveKey = key; player.lastMoveTime = Date.now(); }
+            if (key === 's') { player.lastMoveKey = key; player.lastMoveTime = Date.now(); }
             if (gameMode === 'TWO_PLAYER') {
-                if (key === 'j' || key === 'l') {
-                    fighterRight.lastMoveKey = key;
-                    fighterRight.lastMoveTime = Date.now();
-                }
-                if (key === 'k') {
-                    fighterRight.lastMoveKey = key;
-                    fighterRight.lastMoveTime = Date.now();
-                }
+                if (key === 'j' || key === 'l') { fighterRight.lastMoveKey = key; fighterRight.lastMoveTime = Date.now(); }
+                if (key === 'k') { fighterRight.lastMoveKey = key; fighterRight.lastMoveTime = Date.now(); }
             }
         });
 
         document.addEventListener('keyup', (e) => {
             const key = e.key.toLowerCase();
             keys[key] = false;
-            
-            if (isOnlineGame) {
-                socket.emit('playerInput', { key: key, state: 'up' });
-            }
+            if (isOnlineGame) socket.emit('playerInput', { key: key, state: 'up' });
         });
-        
+
         window.onload = function() {
             const savedName = localStorage.getItem(OM_PLAYER_NAME_KEY);
-            if (savedName) {
-                playerNameInput.value = savedName;
-                handleNameInput();
-            } else {
-                checkGameState();
-            }
+            if (savedName) { playerNameInput.value = savedName; handleNameInput(); } else checkGameState();
         };
-
     </script>
 </body>
 </html>
