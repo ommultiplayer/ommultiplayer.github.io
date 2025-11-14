@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Om: Het Oneindige Gevecht</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script> 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900;600&display=swap');
         
@@ -268,6 +269,11 @@
         const DASH_DISTANCE = 150;
         const DASH_DURATION = 5;
         const DASH_COOLDOWN = 60;
+        
+        const SERVER_URL = 'joshthedev888-server.onrender.com'; 
+        const socket = io(SERVER_URL);
+        let isOnlineGame = false;
+
 
         let gameState = GAME_MENU;
         let gameMode = 'SINGLE_PLAYER'; 
@@ -432,6 +438,15 @@
             }
             
             gameMode = mode;
+
+            if (gameMode === 'TWO_PLAYER') {
+                isOnlineGame = true;
+                showMessage("Verbinding Maken", "Zoekende naar een tegenstander...");
+                socket.emit('requestMatch', { playerName: playerName });
+                return; 
+            }
+            
+            isOnlineGame = false;
             const startLevel = savedLevel > 0 && mode === 'SINGLE_PLAYER' ? savedLevel : 1;
             
             initializeFighters(mode, startLevel);
@@ -649,7 +664,7 @@
             const now = Date.now();
             const DASH_TIME_WINDOW = 300; 
 
-            if (fighter.dashCooldown > 0 || fighter.isJumping) return;
+            if (fighter.dashCooldown > 0 || fighter.isJumping || isOnlineGame) return;
 
             if (fighter.lastMoveKey === directionKey && now - fighter.lastMoveTime < DASH_TIME_WINDOW) {
                 fighter.isDashing = true;
@@ -686,6 +701,7 @@
         }
 
         function handleMovement() {
+            if (isOnlineGame) return; 
             
             if (keys['s'] && !player.isJumping) { 
                 startDash(player, 's');
@@ -825,6 +841,8 @@
         }
 
         function handleCombat() {
+            if (isOnlineGame) return; 
+            
             checkAttack(player, fighterRight);
             checkAttack(fighterRight, player);
             checkSharpenerPickup(player);
@@ -859,7 +877,7 @@
         }
 
         function checkSharpenerPickup(fighter) {
-            if (!sharpener.active) return;
+            if (!sharpener.active || isOnlineGame) return;
 
             const distance = Math.sqrt(
                 Math.pow(fighter.x - sharpener.x, 2) +
@@ -877,6 +895,8 @@
         }
 
         function updateSharpener() {
+            if (isOnlineGame) return;
+            
             if (sharpener.active) {
                 sharpener.timer++;
                 if (sharpener.timer > 60 * 10) { 
@@ -926,11 +946,11 @@
 
             updateGameUI();
 
-            if (player.health <= 0) {
+            if (!isOnlineGame && player.health <= 0) {
                 handleGameOver(fighterRightName.textContent, player.level);
                 return;
             }
-            if (fighterRight.health <= 0) {
+            if (!isOnlineGame && fighterRight.health <= 0) {
                 if (gameMode === 'SINGLE_PLAYER') {
                     handleLevelUp();
                 } else {
@@ -941,10 +961,48 @@
             
             animationFrameId = requestAnimationFrame(gameLoop);
         }
+        
+        socket.on('matchFound', (data) => {
+            showMessage("Gevecht Gevonden!", `Je vecht tegen ${data.opponentName}.`);
+            
+            transitionTo(gameUi, menuUi); 
+            
+            player.id = socket.id;
+            player.x = data.isPlayer1 ? 120 : CANVAS_WIDTH - 120;
+            fighterRight.x = data.isPlayer1 ? CANVAS_WIDTH - 120 : 120;
+            
+            gameState = GAME_RUNNING;
+            updateGameUI();
+            gameLoop();
+        });
+
+        socket.on('updateState', (state) => {
+            if (gameState !== GAME_RUNNING) return;
+
+            const myState = state.p1.id === socket.id ? state.p1 : state.p2;
+            const remoteState = state.p1.id === socket.id ? state.p2 : state.p1;
+
+            Object.assign(player, myState); 
+            Object.assign(fighterRight, remoteState);
+        });
+
+        socket.on('matchOver', (data) => {
+            handleGameOver(data.winnerName, data.loserLevel); 
+        });
+
+        socket.on('error', (message) => {
+            showMessage("Netwerkfout", message);
+            isOnlineGame = false;
+        });
 
         document.addEventListener('keydown', (e) => {
             const key = e.key.toLowerCase();
             keys[key] = true;
+
+            if (isOnlineGame) {
+                socket.emit('playerInput', { key: key, state: 'down' });
+                return;
+            }
 
             if (key === 'a' || key === 'd') {
                 player.lastMoveKey = key;
@@ -968,7 +1026,12 @@
         });
 
         document.addEventListener('keyup', (e) => {
-            keys[e.key.toLowerCase()] = false;
+            const key = e.key.toLowerCase();
+            keys[key] = false;
+            
+            if (isOnlineGame) {
+                socket.emit('playerInput', { key: key, state: 'up' });
+            }
         });
         
         window.onload = function() {
