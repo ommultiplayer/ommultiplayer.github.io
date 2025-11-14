@@ -655,7 +655,14 @@
                 fighter.isDashing = true;
                 fighter.dashTimer = DASH_DURATION; 
                 fighter.dashCooldown = DASH_COOLDOWN;
-                fighter.direction = directionKey === 'a' || directionKey === 'j' ? -1 : 1;
+                fighter.direction = directionKey === 'a' || directionKey === 'j' || directionKey === 's' || directionKey === 'k' ? (fighter.direction === -1 ? -1 : 1) : 1; 
+                if (directionKey === 's' || directionKey === 'k') { 
+                    if (fighter === player) {
+                        fighter.direction = keys['a'] ? -1 : (keys['d'] ? 1 : fighter.direction);
+                    } else if (fighter === fighterRight) {
+                        fighter.direction = keys['j'] ? -1 : (keys['l'] ? 1 : fighter.direction);
+                    }
+                }
             }
             fighter.lastMoveKey = directionKey;
             fighter.lastMoveTime = now;
@@ -685,7 +692,7 @@
             } else if (keys['k'] && !fighterRight.isJumping && gameMode === 'TWO_PLAYER') {
                 startDash(fighterRight, 'k');
             }
-
+            
             if (player.isDashing) {
                 updateDash(player);
                 applyPhysics(player);
@@ -695,14 +702,10 @@
             if (keys['a']) {
                 player.x = Math.max(player.x - player.speed, 20);
                 player.direction = -1;
-                player.lastMoveKey = 'a';
-                player.lastMoveTime = Date.now();
             }
             if (keys['d']) {
                 player.x = Math.min(player.x + player.speed, CANVAS_WIDTH - 20); 
                 player.direction = 1;
-                player.lastMoveKey = 'd';
-                player.lastMoveTime = Date.now();
             }
             if (keys['w'] && !player.isJumping) {
                 player.isJumping = true;
@@ -722,14 +725,10 @@
                 if (keys['j']) {
                     fighterRight.x = Math.max(fighterRight.x - fighterRight.speed, 20);
                     fighterRight.direction = -1;
-                    fighterRight.lastMoveKey = 'j';
-                    fighterRight.lastMoveTime = Date.now();
                 }
                 if (keys['l']) {
                     fighterRight.x = Math.min(fighterRight.x + fighterRight.speed, CANVAS_WIDTH - 20);
                     fighterRight.direction = 1;
-                    fighterRight.lastMoveKey = 'l';
-                    fighterRight.lastMoveTime = Date.now();
                 }
                 if (keys['i'] && !fighterRight.isJumping) {
                     fighterRight.isJumping = true;
@@ -944,7 +943,28 @@
         }
 
         document.addEventListener('keydown', (e) => {
-            keys[e.key.toLowerCase()] = true;
+            const key = e.key.toLowerCase();
+            keys[key] = true;
+
+            if (key === 'a' || key === 'd') {
+                player.lastMoveKey = key;
+                player.lastMoveTime = Date.now();
+            }
+            if (key === 's') {
+                player.lastMoveKey = key;
+                player.lastMoveTime = Date.now();
+            }
+
+            if (gameMode === 'TWO_PLAYER') {
+                if (key === 'j' || key === 'l') {
+                    fighterRight.lastMoveKey = key;
+                    fighterRight.lastMoveTime = Date.now();
+                }
+                if (key === 'k') {
+                    fighterRight.lastMoveKey = key;
+                    fighterRight.lastMoveTime = Date.now();
+                }
+            }
         });
 
         document.addEventListener('keyup', (e) => {
